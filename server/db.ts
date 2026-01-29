@@ -1,14 +1,17 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
-import * as schema from "@shared/schema";
+import { MongoClient, type Db } from "mongodb";
 
-const { Pool } = pg;
+const mongoUri = process.env.MONGODB_URI || process.env.DB_URL;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+if (!mongoUri) {
+  throw new Error("MONGODB_URI (or DB_URL) must be set.");
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+const client = new MongoClient(mongoUri);
+const clientPromise = client.connect();
+
+export async function getDb(): Promise<Db> {
+  const connected = await clientPromise;
+  return connected.db(
+    process.env.MONGODB_DB || process.env.DB_NAME || "portfolio",
+  );
+}

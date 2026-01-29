@@ -7,8 +7,12 @@ import { Projects } from "@/components/Projects";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { motion, useScroll, useSpring } from "framer-motion";
+import { usePortfolio } from "@/hooks/use-portfolio";
+import { defaultPortfolio } from "@shared/schema";
 
 export default function Home() {
+  const { data } = usePortfolio();
+  const portfolio = data ?? defaultPortfolio;
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -24,18 +28,18 @@ export default function Home() {
         style={{ scaleX }}
       />
 
-      <Navbar />
+      <Navbar brand={portfolio.brand} />
       
       <main>
-        <Hero />
-        <About />
-        <Skills />
-        <Experience />
-        <Projects />
-        <Contact />
+        <Hero data={portfolio.hero} />
+        <About data={portfolio.about} />
+        <Skills data={portfolio.skills} />
+        <Experience data={portfolio.experience} />
+        <Projects data={portfolio.projects} />
+        <Contact data={portfolio.contact} />
       </main>
 
-      <Footer />
+      <Footer brand={portfolio.brand} footer={portfolio.footer} />
     </div>
   );
 }

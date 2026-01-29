@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertMessageSchema, type InsertMessage } from "@shared/schema";
+import { insertMessageSchema, type InsertMessage, type PortfolioData } from "@shared/schema";
 import { useContact } from "@/hooks/use-contact";
 import { motion } from "framer-motion";
 import { Send, Loader2, Mail, MapPin } from "lucide-react";
@@ -16,9 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-export function Contact() {
+type ContactProps = {
+  data: PortfolioData["contact"];
+};
+
+export function Contact({ data }: ContactProps) {
   const { mutate, isPending } = useContact();
-  
+
   const form = useForm<InsertMessage>({
     resolver: zodResolver(insertMessageSchema),
     defaultValues: {
@@ -28,8 +32,8 @@ export function Contact() {
     },
   });
 
-  const onSubmit = (data: InsertMessage) => {
-    mutate(data, {
+  const onSubmit = (formData: InsertMessage) => {
+    mutate(formData, {
       onSuccess: () => form.reset(),
     });
   };
@@ -46,10 +50,11 @@ export function Contact() {
           {/* Contact Info */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">Let's work together</h2>
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
+                {data.heading}
+              </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                I'm currently available for freelance projects and full-time opportunities. 
-                If you have a project that needs some creative touch, I'd love to hear about it.
+                {data.body}
               </p>
             </div>
 
@@ -60,8 +65,11 @@ export function Contact() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-1">Email</h3>
-                  <a href="mailto:ajoseoyedepo@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
-                    ajoseoyedepo@gmail.com
+                  <a
+                    href={`mailto:${data.email}`}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {data.email}
                   </a>
                 </div>
               </div>
@@ -71,7 +79,7 @@ export function Contact() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-1">Location</h3>
-                  <p className="text-muted-foreground">Lagos, Nigeria</p>
+                  <p className="text-muted-foreground">{data.location}</p>
                 </div>
               </div>
             </div>
@@ -88,9 +96,9 @@ export function Contact() {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Your name" 
-                          {...field} 
+                        <Input
+                          placeholder="Your name"
+                          {...field}
                           className="h-12 bg-background/50 border-input focus:border-primary transition-colors"
                         />
                       </FormControl>
@@ -98,7 +106,7 @@ export function Contact() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -106,10 +114,10 @@ export function Contact() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="hello@example.com" 
-                          {...field} 
+                        <Input
+                          type="email"
+                          placeholder="hello@example.com"
+                          {...field}
                           className="h-12 bg-background/50 border-input focus:border-primary transition-colors"
                         />
                       </FormControl>
@@ -117,7 +125,7 @@ export function Contact() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="message"
@@ -125,9 +133,9 @@ export function Contact() {
                     <FormItem>
                       <FormLabel>Message</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Tell me about your project..." 
-                          {...field} 
+                        <Textarea
+                          placeholder="Tell me about your project..."
+                          {...field}
                           className="min-h-[150px] bg-background/50 border-input focus:border-primary transition-colors resize-none"
                         />
                       </FormControl>
@@ -136,8 +144,8 @@ export function Contact() {
                   )}
                 />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isPending}
                   className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
                 >

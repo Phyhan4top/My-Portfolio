@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Code2 } from "lucide-react";
+import type { PortfolioData } from "@shared/schema";
 
-export function Navbar() {
+type NavbarProps = {
+  brand: PortfolioData["brand"];
+};
+
+export function Navbar({ brand }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [location] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -31,7 +35,9 @@ export function Navbar() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-background/80 backdrop-blur-md border-b border-border/50 py-3" : "bg-transparent py-6"
+        scrolled
+          ? "bg-background/80 backdrop-blur-md border-b border-border/50 py-3"
+          : "bg-transparent py-6"
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -40,7 +46,8 @@ export function Navbar() {
             <Code2 className="w-6 h-6 text-primary" />
           </div>
           <span className="font-display font-bold text-xl tracking-tight">
-            Ajose<span className="text-primary">.dev</span>
+            {brand.name}
+            <span className="text-primary">{brand.accent}</span>
           </span>
         </Link>
 
@@ -50,8 +57,8 @@ export function Navbar() {
             <a
               key={link.name}
               href={link.href}
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={(event) => {
+                event.preventDefault();
                 handleNavClick(link.href);
               }}
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -61,8 +68,8 @@ export function Navbar() {
           ))}
           <a
             href="#contact"
-            onClick={(e) => {
-              e.preventDefault();
+            onClick={(event) => {
+              event.preventDefault();
               handleNavClick("#contact");
             }}
             className="px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
@@ -94,8 +101,8 @@ export function Navbar() {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
+                  onClick={(event) => {
+                    event.preventDefault();
                     handleNavClick(link.href);
                   }}
                   className="text-lg font-medium text-muted-foreground hover:text-primary py-2"
@@ -105,8 +112,8 @@ export function Navbar() {
               ))}
               <a
                 href="#contact"
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={(event) => {
+                  event.preventDefault();
                   handleNavClick("#contact");
                 }}
                 className="mt-2 text-center w-full px-5 py-3 rounded-xl font-semibold bg-primary text-primary-foreground"

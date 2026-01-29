@@ -20,6 +20,13 @@ export function useContact() {
           const error = api.contact.submit.responses[400].parse(await res.json());
           throw new Error(error.message);
         }
+        const contentType = res.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const errorBody = await res.json();
+          if (errorBody?.message) {
+            throw new Error(errorBody.message);
+          }
+        }
         throw new Error("Failed to send message");
       }
 

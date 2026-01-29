@@ -1,7 +1,21 @@
+import type { PortfolioData } from "@shared/schema";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, ArrowRight, Download } from "lucide-react";
+import { ArrowRight, Download, Github, Linkedin, Mail } from "lucide-react";
+import { Fragment } from "react";
 
-export function Hero() {
+const socialIcons = {
+  github: Github,
+  linkedin: Linkedin,
+  email: Mail,
+};
+
+type HeroProps = {
+  data: PortfolioData["hero"];
+};
+
+export function Hero({ data }: HeroProps) {
+  const highlightCount = data.highlights.length;
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Background Elements */}
@@ -21,16 +35,31 @@ export function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              Available for work
+              {data.availability}
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.1] mb-6">
-              Hi, I'm <br />
-              <span className="gradient-text">Ajose Oyedepo</span>
+              {data.greeting} <br />
+              <span className="gradient-text">{data.name}</span>
             </h1>
-            
+
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto md:mx-0 leading-relaxed">
-              A creative Front-End Software Engineer specializing in building exceptional digital experiences with <span className="text-foreground font-semibold">React</span>, <span className="text-foreground font-semibold">Next.js</span>, and <span className="text-foreground font-semibold">Vue.js</span>.
+              {data.subheadline}{" "}
+              {highlightCount > 0 && (
+                <>
+                  {data.highlights.map((item, index) => (
+                    <Fragment key={`${item}-${index}`}>
+                      <span className="text-foreground font-semibold">
+                        {item}
+                      </span>
+                      {index < highlightCount - 2 && ", "}
+                      {index === highlightCount - 2 && " and "}
+                      {index === highlightCount - 1 && "."}
+                    </Fragment>
+                  ))}
+                </>
+              )}
+              {highlightCount === 0 && "."}
             </p>
           </motion.div>
 
@@ -40,18 +69,19 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4"
           >
-            <a 
-              href="#projects" 
+            <a
+              href={data.primaryCta.href}
               className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-foreground text-background font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
             >
-              View Projects <ArrowRight className="w-4 h-4" />
+              {data.primaryCta.label} <ArrowRight className="w-4 h-4" />
             </a>
-            <a 
-              href="/resume.pdf" 
-              target="_blank"
+            <a
+              href={data.secondaryCta.href}
+              target={data.secondaryCta.newTab ? "_blank" : undefined}
+              rel={data.secondaryCta.newTab ? "noreferrer" : undefined}
               className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-border bg-transparent hover:bg-muted/50 transition-colors font-medium flex items-center justify-center gap-2"
             >
-              Download CV <Download className="w-4 h-4" />
+              {data.secondaryCta.label} <Download className="w-4 h-4" />
             </a>
           </motion.div>
 
@@ -61,22 +91,21 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="flex items-center justify-center md:justify-start gap-6 pt-4"
           >
-            {[
-              { icon: Github, href: "https://github.com/ajoseoyedepo", label: "GitHub" },
-              { icon: Linkedin, href: "https://linkedin.com/in/ajoseoyedepo", label: "LinkedIn" },
-              { icon: Mail, href: "mailto:ajoseoyedepo@gmail.com", label: "Email" },
-            ].map((social) => (
-              <a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noreferrer"
-                className="p-3 rounded-full bg-muted/50 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all hover:scale-110"
-                aria-label={social.label}
-              >
-                <social.icon className="w-5 h-5" />
-              </a>
-            ))}
+            {data.socials.map((social) => {
+              const Icon = socialIcons[social.icon];
+              return (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-3 rounded-full bg-muted/50 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all hover:scale-110"
+                  aria-label={social.label}
+                >
+                  <Icon className="w-5 h-5" />
+                </a>
+              );
+            })}
           </motion.div>
         </div>
 
@@ -91,22 +120,41 @@ export function Hero() {
           <div className="relative w-full h-full rounded-[2rem] overflow-hidden border border-white/10 glass-card flex items-center justify-center bg-zinc-900/50">
             {/* Using a tech-focused abstract composition instead of stock photo */}
             <div className="relative z-10 p-8 text-center">
-               <div className="w-24 h-24 mx-auto bg-primary/20 rounded-2xl flex items-center justify-center mb-6 border border-primary/30">
-                 <span className="text-4xl">👨‍💻</span>
-               </div>
-               <h3 className="text-2xl font-display font-bold text-white mb-2">Ajose Oyedepo</h3>
-               <p className="text-primary/80 font-mono text-sm">@Lagos, Nigeria</p>
-               
-               <div className="mt-8 grid grid-cols-2 gap-4 text-left">
-                 <div className="p-4 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
-                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Experience</p>
-                   <p className="text-xl font-bold font-display">2+ Years</p>
-                 </div>
-                 <div className="p-4 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
-                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Projects</p>
-                   <p className="text-xl font-bold font-display">15+ Done</p>
-                 </div>
-               </div>
+              {data.image?.url ? (
+                <div className="w-28 h-28 mx-auto mb-6 rounded-2xl overflow-hidden border border-primary/30">
+                  <img
+                    src={data.image.url}
+                    alt={data.image.alt || `${data.profileCard.name} portrait`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 mx-auto bg-primary/20 rounded-2xl flex items-center justify-center mb-6 border border-primary/30">
+                  <span className="text-2xl font-semibold text-primary">DEV</span>
+                </div>
+              )}
+              <h3 className="text-2xl font-display font-bold text-white mb-2">
+                {data.profileCard.name}
+              </h3>
+              <p className="text-primary/80 font-mono text-sm">
+                @{data.profileCard.location}
+              </p>
+
+              <div className="mt-8 grid grid-cols-2 gap-4 text-left">
+                {data.profileCard.stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="p-4 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm"
+                  >
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                      {stat.label}
+                    </p>
+                    <p className="text-xl font-bold font-display">
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
