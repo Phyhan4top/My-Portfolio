@@ -9,9 +9,10 @@ import { Footer } from "@/components/Footer";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { defaultPortfolio } from "@shared/schema";
+import { PortfolioLoader } from "@/components/PortfolioLoader";
 
 export default function Home() {
-  const { data } = usePortfolio();
+  const { data, isLoading } = usePortfolio();
   const portfolio = data ?? defaultPortfolio;
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -19,6 +20,10 @@ export default function Home() {
     damping: 30,
     restDelta: 0.001
   });
+
+  if (isLoading) {
+    return <PortfolioLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground">
