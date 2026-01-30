@@ -47,6 +47,12 @@ export const portfolioSchema = z.object({
   brand: z.object({
     name: z.string(),
     accent: z.string(),
+    logo: z
+      .object({
+        url: urlOrPathSchema,
+        alt: z.string().optional(),
+      })
+      .optional(),
   }),
   hero: z.object({
     availability: z.string(),
@@ -154,6 +160,10 @@ export const defaultPortfolio: PortfolioData = {
   brand: {
     name: "Ajose",
     accent: ".dev",
+    logo: {
+      url: "",
+      alt: "Ajose logo",
+    },
   },
   hero: {
     availability: "Available for work",

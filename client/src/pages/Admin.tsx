@@ -35,6 +35,7 @@ export default function Admin() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadingProjectIndex, setUploadingProjectIndex] = useState<number | null>(null);
   const [uploadingNewProject, setUploadingNewProject] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     const current = data ?? defaultPortfolio;
@@ -278,6 +279,38 @@ export default function Admin() {
     }
   };
 
+  const handleLogoUpload = async (file: File) => {
+    setUploadingLogo(true);
+    try {
+      const result = await uploadFile(file);
+      const updated = applyJsonUpdate((current) => ({
+        ...current,
+        brand: {
+          ...current.brand,
+          logo: {
+            url: result.url,
+            alt: current.brand.logo?.alt || `${current.brand.name} logo`,
+          },
+        },
+      }));
+
+      if (updated) {
+        toast({
+          title: "Logo uploaded",
+          description: "Click Save changes to publish it.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Upload failed.",
+      });
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   const addProject = (imageUrl?: string) => {
     applyJsonUpdate((current) => ({
       ...current,
@@ -397,6 +430,24 @@ export default function Admin() {
               Current: {currentPortfolio?.hero.secondaryCta.href || "Not set"}
             </p>
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">Logo</h2>
+            <p className="text-sm text-muted-foreground">
+              Upload your logo (PNG/JPG/WEBP/GIF). Recommended square image.
+            </p>
+          </div>
+          <FileDropZone
+            accept="image/*"
+            buttonLabel={uploadingLogo ? "Uploading..." : "Choose Logo"}
+            disabled={uploadingLogo || !token}
+            onFileSelected={handleLogoUpload}
+          />
+          <p className="text-xs text-muted-foreground">
+            Current: {currentPortfolio?.brand.logo?.url || "Not set"}
+          </p>
         </div>
 
         {currentPortfolio && (

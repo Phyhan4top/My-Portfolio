@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Link } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Code2 } from "lucide-react";
 import type { PortfolioData } from "@shared/schema";
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "wouter";
 
 type NavbarProps = {
   brand: PortfolioData["brand"];
@@ -41,13 +41,18 @@ export function Navbar({ brand }: NavbarProps) {
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-          <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-            <Code2 className="w-6 h-6 text-primary" />
-          </div>
-          <span className="font-display font-bold text-xl tracking-tight">
-            {brand.name}
-            <span className="text-primary">{brand.accent}</span>
+        <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+          {brand.logo?.url ? (
+            <img
+              src={brand.logo.url}
+              alt={brand.logo.alt || "Logo"}
+              className="h-20 w-[100px] rounded-xl object-contain"
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors" />
+          )}
+          <span className="sr-only">
+            {brand.logo?.alt || `${brand.name}${brand.accent}`}
           </span>
         </Link>
 

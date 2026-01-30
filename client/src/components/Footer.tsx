@@ -1,4 +1,3 @@
-import { Code2 } from "lucide-react";
 import type { PortfolioData } from "@shared/schema";
 
 type FooterProps = {
@@ -11,10 +10,17 @@ export function Footer({ brand, footer }: FooterProps) {
     <footer className="py-8 border-t border-border bg-card">
       <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Code2 className="w-5 h-5 text-primary" />
-          <span className="font-display font-bold text-lg">
-            {brand.name}
-            <span className="text-primary">{brand.accent}</span>
+          {brand.logo?.url ? (
+            <img
+              src={brand.logo.url}
+              alt={brand.logo.alt || "Logo"}
+              className="h-20 w-[100px] rounded-md object-contain"
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-md bg-primary/10" />
+          )}
+          <span className="sr-only">
+            {brand.logo?.alt || `${brand.name}${brand.accent}`}
           </span>
         </div>
 
