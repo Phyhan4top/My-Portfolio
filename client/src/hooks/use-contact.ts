@@ -8,12 +8,25 @@ export function useContact() {
   return useMutation({
     mutationFn: async (data: MessageInput) => {
       const validated = api.contact.submit.input.parse(data);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       
-      const res = await fetch(api.contact.submit.path, {
-        method: api.contact.submit.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validated),
-      });
+      let res: Response;
+      try {
+        res = await fetch(api.contact.submit.path, {
+          method: api.contact.submit.method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(validated),
+          signal: controller.signal,
+        });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          throw new Error("Request timed out. Please try again.");
+        }
+        throw error;
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (!res.ok) {
         if (res.status === 400) {

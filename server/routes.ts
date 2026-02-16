@@ -51,8 +51,12 @@ export async function registerRoutes(
     try {
       const input = api.contact.submit.input.parse(req.body);
       const message = await storage.createMessage(input);
-      await sendContactEmail(input);
       res.status(201).json(message);
+
+      // Do not block client response on SMTP availability in production.
+      void sendContactEmail(input).catch((error) => {
+        console.error("Failed to send contact email:", error);
+      });
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
