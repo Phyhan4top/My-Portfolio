@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://my-portfolio-9mpt.onrender.com/sitemap.xml
+Sitemap: https://ajose-oyedepo.vercel.app/sitemap.xml

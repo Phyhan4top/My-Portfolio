@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PortfolioData } from "@shared/schema";
 
-const LETTERS = "Phyhan".split("");
 const SIDE_BEARINGS_EM = 0.135;
 const LEFT_BEARING_EM = 0.082;
 
@@ -9,7 +8,7 @@ const LEFT_BEARING_EM = 0.082;
  * The wordmark fills the sheet exactly. A dimension line above it reports its
  * true measured width, which is the kind of detail an engineer would check.
  */
-function Wordmark() {
+function Wordmark({ name }: { name: string }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const [fontSize, setFontSize] = useState<number | null>(null);
@@ -26,7 +25,7 @@ function Wordmark() {
       const textWidth = measure.getBoundingClientRect().width;
       if (!textWidth) return;
       // The measuring copy is set at 100px. Taking out the empty side bearings
-      // of the P and the n lets the ink itself reach both edges of the sheet.
+      // of the first and last letters lets the ink reach both edges of the sheet.
       setFontSize(boxWidth / (textWidth / 100 - SIDE_BEARINGS_EM));
       setWidth(Math.round(boxWidth));
     };
@@ -36,7 +35,8 @@ function Wordmark() {
     observer.observe(box);
     document.fonts?.ready.then(fit);
     return () => observer.disconnect();
-  }, []);
+    // A different name has a different width, so it has to be fitted again.
+  }, [name]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setFolded(false), 60);
@@ -56,7 +56,7 @@ function Wordmark() {
       {/* Zero-sized wrapper: the 100px copy must never add to the page's scrollable width. */}
       <div className="invisible absolute left-0 top-0 h-0 w-0 overflow-hidden" aria-hidden="true">
         <span ref={measureRef} className="wordmark !inline-block" style={{ fontSize: 100 }}>
-          Phyhan
+          {name}
         </span>
       </div>
 
@@ -64,14 +64,14 @@ function Wordmark() {
         className="wordmark mt-3 select-none pb-[0.14em]"
         data-folded={folded}
         style={fontSize ? { fontSize, marginLeft: `-${LEFT_BEARING_EM}em` } : undefined}
-        aria-label="Phyhan"
+        aria-label={name}
       >
-        {LETTERS.map((letter, index) => (
+        {Array.from(name).map((letter, index) => (
           <span
             key={index}
             aria-hidden="true"
             className="wordmark-letter"
-            style={{ "--i": index } as React.CSSProperties}
+            style={{ "--i": index, whiteSpace: "pre" } as React.CSSProperties}
           >
             {letter}
           </span>
@@ -115,7 +115,7 @@ export function Intro({ identity, intro }: IntroProps) {
 
   return (
     <section id="intro" className="gutter pb-10 pt-4 md:pb-14" aria-label="Introduction">
-      <Wordmark />
+      <Wordmark name={identity.shortName} />
 
       <div className="grid-12 mt-4 gap-y-10 md:mt-6">
         {/* Title block */}

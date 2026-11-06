@@ -16,7 +16,7 @@ export default function ProjectPage() {
   const project = projects[index];
 
   useSeo({
-    title: project ? `${project.name}: work by Phyhan` : "Sheet not found: Phyhan",
+    title: project ? `${project.name}: work by ${identity.shortName}` : `Sheet not found: ${identity.shortName}`,
     description: project?.summary ?? "This sheet isn't in the set.",
     path: `/work/${slug}`,
   });

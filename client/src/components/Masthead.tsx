@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { SHEETS, type SheetId } from "@/lib/sheets";
+import { usePortfolio } from "@/hooks/use-portfolio";
 import { SiteLink } from "./SiteLink";
 
 const NAV = SHEETS.filter((sheet) => sheet.id !== "intro");
@@ -49,6 +50,7 @@ function useHideOnScroll(): boolean {
 }
 
 export function Masthead() {
+  const { shortName } = usePortfolio().identity;
   const [path] = useLocation();
   const onHome = path === "/";
   const activeOnHome = useActiveSheet(onHome);
@@ -87,8 +89,8 @@ export function Masthead() {
           hidden && !indexOpen ? "-translate-y-full" : ""
         }`}
       >
-        <SiteLink href="/" className="group flex items-baseline gap-3" aria-label="Phyhan, home">
-          <span className="t-wide text-lg leading-none transition-colors group-hover:text-pen">Phyhan</span>
+        <SiteLink href="/" className="group flex items-baseline gap-3" aria-label={`${shortName}, home`}>
+          <span className="t-wide text-lg leading-none transition-colors group-hover:text-pen">{shortName}</span>
           <span className="t-label hidden sm:inline">Frontend Engineer</span>
         </SiteLink>
 

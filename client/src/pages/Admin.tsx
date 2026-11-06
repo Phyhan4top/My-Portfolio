@@ -253,7 +253,7 @@ function Editor({
         {/* Save bar */}
         <header className="gutter sticky top-0 z-40 flex min-h-[60px] flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ink bg-paper py-2">
           <div className="flex items-baseline gap-3">
-            <h1 className="t-wide text-lg leading-none">Phyhan</h1>
+            <h1 className="t-wide text-lg leading-none">{draft.identity.shortName}</h1>
             <p className="t-label hidden sm:block">Back office</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -408,7 +408,7 @@ function Editor({
 }
 
 export default function Admin() {
-  useSeo({ title: "Admin: Phyhan", description: "Content editor.", path: "/admin" });
+  useSeo({ title: "Admin", description: "Content editor.", path: "/admin" });
 
   const [token, setToken] = useState(() => storage.get(TOKEN_KEY) ?? "");
 

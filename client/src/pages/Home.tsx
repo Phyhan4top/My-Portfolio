@@ -13,9 +13,8 @@ export default function Home() {
   const portfolio = usePortfolio();
 
   useSeo({
-    title: "Phyhan: Frontend Engineer, Lagos",
-    description:
-      "Ajose Oyedepo Olufihan (Phyhan) is a frontend engineer in Lagos, building complex products in React, Next.js and TypeScript, from the interface to the systems behind it.",
+    title: `${portfolio.identity.shortName}: Frontend Engineer, Lagos`,
+    description: `${portfolio.identity.fullName} (${portfolio.identity.shortName}) is a frontend engineer in Lagos, building complex products in React, Next.js and TypeScript, from the interface to the systems behind it.`,
     path: "/",
   });
 

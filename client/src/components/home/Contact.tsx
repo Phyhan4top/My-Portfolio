@@ -152,7 +152,7 @@ export function Contact({ identity, data }: ContactProps) {
           ) : (
             <form
               noValidate
-              aria-label="Send Phyhan a message"
+              aria-label={`Send ${identity.shortName} a message`}
               onSubmit={(event: FormEvent<HTMLFormElement>) => {
                 event.preventDefault();
                 void submit(event.currentTarget);

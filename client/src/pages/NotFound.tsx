@@ -1,10 +1,13 @@
 import { Masthead } from "@/components/Masthead";
 import { SiteLink } from "@/components/SiteLink";
+import { usePortfolio } from "@/hooks/use-portfolio";
 import { useSeo } from "@/hooks/use-seo";
 
 export default function NotFound() {
+  const { shortName } = usePortfolio().identity;
+
   useSeo({
-    title: "Sheet not found: Phyhan",
+    title: `Sheet not found: ${shortName}`,
     description: "This sheet isn't in the set.",
     path: window.location.pathname,
   });
