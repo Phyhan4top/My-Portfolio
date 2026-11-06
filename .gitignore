@@ -1,7 +1,10 @@
 node_modules
 dist
+.claude
 .DS_Store
 server/public
 vite.config.ts.*
 *.tar.gz
 .env
+cv/
+.vercel

@@ -1,97 +1,482 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   The drawing set.
+   Paper, ink and one ballpoint pen. Colours flip by redefining the tokens on
+   .theme-dark, so every component works on both grounds without variants.
+   Spacing follows a 4px base; the gutter and sheet rhythm scale with viewport.
+   ========================================================================== */
+
 :root {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
+  --paper: 236 233 225;
+  --vellum: 245 243 237;
+  --ink: 20 19 15;
+  --graphite: 84 81 73;
+  --pen: 27 43 216;
+  --rule: rgb(var(--ink) / 0.22);
 
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-
-  --primary: 263 70% 50%;
-  --primary-foreground: 210 40% 98%;
-
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-
-  --accent: 263 70% 50%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 263 70% 50%;
-
-  --radius: 0.75rem;
-
-  --font-sans: 'Outfit', sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --gutter: clamp(16px, 3.2vw, 48px);
+  --sheet-gap: clamp(72px, 11vw, 176px);
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
 }
 
-.light {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-
-  --primary: 262 83% 58%;
-  --primary-foreground: 210 40% 98%;
-
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-
-  --accent: 262 83% 58%;
-  --accent-foreground: 240 5.9% 10%;
-
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 262 83% 58%;
+.theme-dark {
+  --paper: 20 19 15;
+  --vellum: 33 32 27;
+  --ink: 236 233 225;
+  --graphite: 170 166 154;
+  --pen: 164 174 255;
+  --rule: rgb(var(--ink) / 0.24);
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
 }
 
 @layer base {
-  * {
-    @apply border-border;
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+    -webkit-text-size-adjust: 100%;
   }
+
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans);
+    background: rgb(var(--paper));
+    color: rgb(var(--ink));
+    font-family: Newsreader, Georgia, serif;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
   }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
-    @apply font-bold tracking-tight;
+
+  ::selection {
+    background: rgb(var(--pen));
+    color: rgb(var(--paper));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--pen));
+    outline-offset: 3px;
+  }
+
+  img {
+    height: auto;
   }
 }
 
-.glass-card {
-  @apply bg-card/60 backdrop-blur-lg border border-white/10 shadow-xl shadow-black/5;
+@layer components {
+  .gutter {
+    padding-inline: var(--gutter);
+  }
+
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(12px, 1.6vw, 24px);
+  }
+
+  /* --- Type ------------------------------------------------------------- */
+
+  .t-mono {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+  }
+
+  .t-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(var(--graphite));
+  }
+
+  .t-wide {
+    font-family: Archivo, "Arial Narrow", sans-serif;
+    font-variation-settings: "wdth" 125, "wght" 780;
+    letter-spacing: -0.035em;
+  }
+
+  .t-condensed {
+    font-family: Archivo, "Arial Narrow", sans-serif;
+    font-variation-settings: "wdth" 68, "wght" 760;
+    letter-spacing: -0.015em;
+    line-height: 0.9;
+  }
+
+  .t-head {
+    font-family: Archivo, "Arial Narrow", sans-serif;
+    font-variation-settings: "wdth" 92, "wght" 560;
+    letter-spacing: -0.018em;
+    line-height: 1.12;
+  }
+
+  .t-statement {
+    font-family: Archivo, "Arial Narrow", sans-serif;
+    font-variation-settings: "wdth" 88, "wght" 480;
+    font-size: clamp(1.625rem, 4.4vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: -0.022em;
+  }
+
+  .t-lede {
+    font-size: clamp(1.25rem, 1.75vw, 1.625rem);
+    line-height: 1.32;
+  }
+
+  .t-body {
+    font-size: 1.125rem;
+    line-height: 1.5;
+    max-width: 62ch;
+  }
+
+  /* --- Marks ------------------------------------------------------------ */
+
+  /* Pen underline that draws in once the statement arrives. */
+  .pen-line {
+    background-image: linear-gradient(rgb(var(--pen)), rgb(var(--pen)));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 0.07em;
+    padding-bottom: 0.04em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* A ruler along the top of a sheet: the transition between sections. */
+  .ruler {
+    height: 12px;
+    border-top: 1px solid rgb(var(--ink));
+    background-image:
+      repeating-linear-gradient(to right, rgb(var(--ink)) 0 1px, transparent 1px 80px),
+      repeating-linear-gradient(to right, var(--rule) 0 1px, transparent 1px 8px);
+    background-size: 100% 12px, 100% 5px;
+    background-repeat: no-repeat;
+  }
+
+  .hairline {
+    border-color: var(--rule);
+  }
+
+  /* Dimension line, as on an engineering drawing. */
+  .dimension {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgb(var(--pen));
+  }
+  .dimension::before,
+  .dimension::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+  }
+  .dimension > span:first-child,
+  .dimension > span:last-child {
+    position: absolute;
+    top: 50%;
+    width: 1px;
+    height: 11px;
+    margin-top: -5.5px;
+    background: currentColor;
+  }
+  .dimension > span:first-child {
+    left: 0;
+  }
+  .dimension > span:last-child {
+    right: 0;
+  }
+
+  /* --- Links and buttons ------------------------------------------------ */
+
+  .link-arrow {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+    font-family: Archivo, sans-serif;
+    font-variation-settings: "wdth" 92, "wght" 560;
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid currentColor;
+    padding-block: 2px;
+    transition: color 160ms, gap 240ms var(--ease);
+  }
+  .link-arrow:hover {
+    color: rgb(var(--pen));
+    gap: 0.85em;
+  }
+
+  .link-quiet {
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+    text-underline-offset: 0.2em;
+    transition: color 160ms, text-decoration-color 160ms;
+  }
+  .link-quiet:hover {
+    color: rgb(var(--pen));
+    text-decoration-color: currentColor;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    min-height: 44px;
+    padding: 10px 18px;
+    font-family: Archivo, sans-serif;
+    font-variation-settings: "wdth" 92, "wght" 580;
+    font-size: 1rem;
+    background: rgb(var(--ink));
+    color: rgb(var(--paper));
+    border: 1px solid rgb(var(--ink));
+    transition: background 160ms, color 160ms, border-color 160ms;
+  }
+  .btn:hover:not(:disabled) {
+    background: rgb(var(--pen));
+    border-color: rgb(var(--pen));
+    color: rgb(var(--paper));
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: rgb(var(--ink));
+  }
+
+  .chip {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    color: rgb(var(--ink));
+    transition: background 160ms, color 160ms, border-color 160ms;
+  }
+  .chip:hover {
+    border-color: rgb(var(--ink));
+  }
+  .chip[aria-pressed="true"] {
+    background: rgb(var(--pen));
+    border-color: rgb(var(--pen));
+    color: rgb(var(--paper));
+  }
+
+  /* --- Plates (images) -------------------------------------------------- */
+
+  .plate {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: rgb(var(--vellum));
+  }
+  .plate img {
+    display: block;
+    width: 100%;
+    transition: transform 700ms var(--ease);
+  }
+  figure:hover > .plate img {
+    transform: scale(1.012);
+  }
+
+  .portrait img {
+    filter: grayscale(1) contrast(1.06);
+    transition: filter 500ms var(--ease), transform 700ms var(--ease);
+  }
+  figure:hover > .portrait img,
+  .portrait:focus-visible img {
+    filter: none;
+  }
+
+  /* --- Form ------------------------------------------------------------- */
+
+  .field {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    border-bottom: 1px solid var(--rule);
+    padding-block: 12px 8px;
+    transition: border-color 160ms;
+  }
+  .field:focus-within {
+    border-color: rgb(var(--pen));
+  }
+  .field[data-invalid="true"] {
+    border-color: rgb(var(--pen));
+  }
+  .field input,
+  .field textarea {
+    width: 100%;
+    background: transparent;
+    color: rgb(var(--ink));
+    font-family: Newsreader, Georgia, serif;
+    font-size: 1.25rem;
+    line-height: 1.4;
+    outline: none;
+    resize: vertical;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: rgb(var(--graphite));
+    opacity: 0.75;
+  }
+  @media (min-width: 640px) {
+    .field {
+      grid-template-columns: 96px 1fr;
+      gap: 12px;
+      align-items: baseline;
+    }
+  }
+
+  /* --- Wordmark --------------------------------------------------------- */
+
+  .wordmark {
+    display: block;
+    white-space: nowrap;
+    font-family: Archivo, "Arial Narrow", sans-serif;
+    font-size: 25.5vw;
+    line-height: 0.78;
+    letter-spacing: -0.045em;
+    font-variation-settings: "wdth" 125, "wght" 800;
+  }
+  .wordmark-letter {
+    display: inline-block;
+    font-variation-settings: "wdth" var(--wdth, 125), "wght" var(--wght, 800);
+    transition: font-variation-settings 900ms var(--ease), color 240ms;
+    transition-delay: calc(var(--i) * 28ms);
+  }
+  .wordmark[data-folded="true"] .wordmark-letter {
+    --wdth: 62;
+    --wght: 500;
+  }
+  @media (hover: hover) {
+    .wordmark-letter:hover {
+      --wght: 200;
+      color: rgb(var(--pen));
+      transition: font-variation-settings 260ms var(--ease), color 120ms;
+      transition-delay: 0ms;
+    }
+  }
+  .dimension-draw {
+    transform-origin: left;
+    animation: draw 1100ms var(--ease) both;
+  }
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  /* --- Admin ------------------------------------------------------------ */
+
+  .admin-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 12px;
+    border: 1px solid var(--rule);
+    background: rgb(var(--vellum));
+    color: rgb(var(--ink));
+    font-family: Archivo, Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.4;
+    transition: border-color 160ms;
+  }
+  .admin-input:hover:not(:disabled) {
+    border-color: rgb(var(--graphite));
+  }
+  .admin-input:focus {
+    outline: 2px solid rgb(var(--pen));
+    outline-offset: -1px;
+  }
+  .admin-input[aria-invalid="true"] {
+    border-color: rgb(var(--pen));
+    border-width: 2px;
+  }
+  .admin-input:disabled {
+    color: rgb(var(--graphite));
+    cursor: not-allowed;
+  }
+  .admin-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+    padding-inline: 8px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    transition: color 160ms, background 160ms;
+  }
+  .admin-icon-btn:hover:not(:disabled) {
+    background: rgb(var(--ink) / 0.08);
+    color: rgb(var(--pen));
+  }
+  .admin-icon-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  /* --- Reveal ----------------------------------------------------------- */
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 700ms var(--ease), transform 800ms var(--ease);
+    transition-delay: var(--delay, 0ms);
+  }
+  .reveal[data-shown="true"] {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-500;
+/* Page transitions: progressive enhancement through the View Transitions API. */
+::view-transition-old(root) {
+  animation: 180ms ease-in both sheet-out;
+}
+::view-transition-new(root) {
+  animation: 340ms var(--ease) both sheet-in;
+}
+@keyframes sheet-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
-.glow {
-  box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.5);
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  figure:hover > .plate img {
+    transform: none;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
 }

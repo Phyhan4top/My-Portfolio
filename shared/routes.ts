@@ -6,6 +6,9 @@ import {
   uploadResponseSchema,
 } from "./schema";
 
+/** Below the 4.5 MB request limit on Vercel, including the form's own overhead. */
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 export const errorSchemas = {
   validation: z.object({
     message: z.string(),
@@ -44,6 +47,19 @@ export const api = {
         200: portfolioSchema,
         400: errorSchemas.validation,
         401: errorSchemas.internal,
+      },
+    },
+  },
+  admin: {
+    /** What the editor starts from. Unlike the public route, a database failure is an error here. */
+    portfolio: {
+      method: "GET" as const,
+      path: "/api/admin/portfolio",
+      responses: {
+        200: z.object({
+          data: portfolioSchema,
+          source: z.enum(["saved", "code", "invalid"]),
+        }),
       },
     },
   },

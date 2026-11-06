@@ -1,13 +1,13 @@
 import type { Express, Request, Response } from "express";
-import type { Server } from "http";
 import { storage } from "./storage";
-import { api } from "@shared/routes";
+import { api, MAX_UPLOAD_BYTES } from "@shared/routes";
 import { z } from "zod";
 import { sendContactEmail } from "./email";
 import { getDb } from "./db";
 import multer from "multer";
 import { GridFSBucket, ObjectId } from "mongodb";
 import { Readable } from "stream";
+import { createHash, timingSafeEqual } from "crypto";
 
 function verifyAdminToken(req: Request, res: Response): boolean {
   const adminToken = process.env.ADMIN_TOKEN;
@@ -21,7 +21,9 @@ function verifyAdminToken(req: Request, res: Response): boolean {
     ? authHeader.slice("Bearer ".length)
     : "";
 
-  if (token !== adminToken) {
+  // Comparing digests keeps the check constant-time, whatever the token's length.
+  const digest = (value: string) => createHash("sha256").update(value).digest();
+  if (!timingSafeEqual(digest(token), digest(adminToken))) {
     res.status(401).json({ message: "Unauthorized" });
     return false;
   }
@@ -29,7 +31,9 @@ function verifyAdminToken(req: Request, res: Response): boolean {
   return true;
 }
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10MB
+/** How long a visitor waits on the email before they get a response anyway. */
+const EMAIL_WAIT_MS = 8000;
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_UPLOAD_BYTES },
@@ -43,20 +47,73 @@ const allowedMimeTypes = new Set([
   "application/pdf",
 ]);
 
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express
-): Promise<Server> {
+/**
+ * Small per-IP limit on the contact form. It's kept in memory, so on serverless
+ * hosting each running instance counts separately. The honeypot and the size
+ * limits on messages still apply everywhere.
+ */
+const CONTACT_WINDOW_MS = 10 * 60 * 1000;
+const CONTACT_MAX_PER_WINDOW = 5;
+const contactAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function isContactRateLimited(ip: string): boolean {
+  const now = Date.now();
+  contactAttempts.forEach((entry, key) => {
+    if (entry.resetAt <= now) contactAttempts.delete(key);
+  });
+
+  const entry = contactAttempts.get(ip);
+  if (!entry) {
+    contactAttempts.set(ip, { count: 1, resetAt: now + CONTACT_WINDOW_MS });
+    return false;
+  }
+
+  entry.count += 1;
+  return entry.count > CONTACT_MAX_PER_WINDOW;
+}
+
+export function registerRoutes(app: Express) {
   app.post(api.contact.submit.path, async (req, res) => {
+    if (isContactRateLimited(req.ip ?? "unknown")) {
+      return res.status(429).json({
+        message: "That's a few messages in a short time. Please try again in a few minutes.",
+      });
+    }
+
     try {
       const input = api.contact.submit.input.parse(req.body);
-      const message = await storage.createMessage(input);
-      res.status(201).json(message);
 
-      // Do not block client response on SMTP availability in production.
-      void sendContactEmail(input).catch((error) => {
-        console.error("Failed to send contact email:", error);
-      });
+      // A filled honeypot means a bot. Look successful, but keep nothing.
+      if (input.website) {
+        return res.status(201).json({
+          id: "0",
+          name: input.name,
+          email: input.email,
+          message: input.message,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      const message = await storage.createMessage(input);
+
+      // Serverless platforms can freeze a function once it responds, so the email
+      // gets its chance first. The message is already saved, so a slow or failing
+      // mail server only delays the visitor briefly and never loses the message.
+      let timer: NodeJS.Timeout | undefined;
+      await Promise.race([
+        sendContactEmail(input).catch((error) => {
+          console.error("Failed to send contact email:", error);
+        }),
+        new Promise<void>((resolve) => {
+          timer = setTimeout(() => {
+            console.error("Contact email is taking too long; responding anyway.");
+            resolve();
+          }, EMAIL_WAIT_MS);
+        }),
+      ]);
+      clearTimeout(timer);
+
+      res.status(201).json(message);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({
@@ -71,6 +128,13 @@ export async function registerRoutes(
   app.get(api.portfolio.get.path, async (_req, res) => {
     const portfolio = await storage.getPortfolio();
     res.status(200).json(portfolio);
+  });
+
+  app.get(api.admin.portfolio.path, async (req, res) => {
+    if (!verifyAdminToken(req, res)) {
+      return;
+    }
+    res.status(200).json(await storage.getEditablePortfolio());
   });
 
   app.put(api.portfolio.update.path, async (req, res) => {
@@ -187,5 +251,9 @@ export async function registerRoutes(
     downloadStream.pipe(res);
   });
 
-  return httpServer;
+  // An unknown API route is a 404, not the app shell.
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ message: "Not found." });
+  });
+
 }

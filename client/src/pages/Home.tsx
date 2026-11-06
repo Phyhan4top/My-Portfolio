@@ -1,50 +1,42 @@
-import { Navbar } from "@/components/Navbar";
-import { Hero } from "@/components/Hero";
-import { About } from "@/components/About";
-import { Skills } from "@/components/Skills";
-import { Experience } from "@/components/Experience";
-import { Projects } from "@/components/Projects";
-import { Contact } from "@/components/Contact";
-import { Footer } from "@/components/Footer";
-import { motion, useScroll, useSpring } from "framer-motion";
+import { useEffect } from "react";
+import { Masthead } from "@/components/Masthead";
+import { Intro } from "@/components/home/Intro";
+import { Work } from "@/components/home/Work";
+import { Practice } from "@/components/home/Practice";
+import { Record } from "@/components/home/Record";
+import { Toolkit } from "@/components/home/Toolkit";
+import { Contact } from "@/components/home/Contact";
 import { usePortfolio } from "@/hooks/use-portfolio";
-import { defaultPortfolio } from "@shared/schema";
-import { PortfolioLoader } from "@/components/PortfolioLoader";
+import { useSeo } from "@/hooks/use-seo";
 
 export default function Home() {
-  const { data, isLoading } = usePortfolio();
-  const portfolio = data ?? defaultPortfolio;
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
+  const portfolio = usePortfolio();
+
+  useSeo({
+    title: "Phyhan: Frontend Engineer, Lagos",
+    description:
+      "Ajose Oyedepo Olufihan (Phyhan) is a frontend engineer in Lagos, building complex products in React, Next.js and TypeScript, from the interface to the systems behind it.",
+    path: "/",
   });
 
-  if (isLoading) {
-    return <PortfolioLoader />;
-  }
+  // Arriving from another page at /#work: go to that sheet straight away.
+  useEffect(() => {
+    if (window.location.hash) {
+      document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ behavior: "instant" });
+    }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground">
-      {/* Scroll Progress Bar */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-primary z-[100] origin-left"
-        style={{ scaleX }}
-      />
-
-      <Navbar brand={portfolio.brand} />
-      
-      <main>
-        <Hero data={portfolio.hero} />
-        <About data={portfolio.about} />
-        <Skills data={portfolio.skills} />
-        <Experience data={portfolio.experience} />
-        <Projects data={portfolio.projects} />
-        <Contact data={portfolio.contact} />
+    <>
+      <Masthead />
+      <main id="main">
+        <Intro identity={portfolio.identity} intro={portfolio.intro} />
+        <Work projects={portfolio.projects} />
+        <Practice data={portfolio.practice} />
+        <Record data={portfolio.record} />
+        <Toolkit data={portfolio.toolkit} />
+        <Contact identity={portfolio.identity} data={portfolio.contact} />
       </main>
-
-      <Footer brand={portfolio.brand} footer={portfolio.footer} />
-    </div>
+    </>
   );
 }

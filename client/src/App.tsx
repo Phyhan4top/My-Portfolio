@@ -1,31 +1,30 @@
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import Admin from "@/pages/Admin";
-import Home from "@/pages/Home";
-import NotFound from "@/pages/not-found";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import Home from "@/pages/Home";
+import ProjectPage from "@/pages/Project";
+import NotFound from "@/pages/NotFound";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/admin" component={Admin} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+// The admin tool is only for Phyhan, so visitors never download it.
+const Admin = lazy(() => import("@/pages/Admin"));
 
-function App() {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchOnWindowFocus: false, retry: 1 },
+  },
+});
+
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <Suspense fallback={null}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/work/:slug" component={ProjectPage} />
+          <Route path="/admin" component={Admin} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </QueryClientProvider>
   );
 }
-
-export default App;
